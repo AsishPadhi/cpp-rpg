@@ -8,6 +8,7 @@ OBJECTS := $(patsubst %.cpp,$(BUILD)/%.o,$(SRCFILES))
 
 # build the binary by default
 all: $(EXENAME)
+-include $(OBJECTS:.o=.d)
 
 # JsonBox {{{
 
@@ -24,15 +25,18 @@ LDFLAGS += -L$(JSONBOX_BUILD) -lJsonBox
 $(JSONBOX_BIN):
 	mkdir -p $(JSONBOX_BUILD)
 	cd $(JSONBOX_BUILD) && cmake $(JSONBOX_SRC)
-	make -C $(JSONBOX_BUILD)
+	$(MAKE) -C $(JSONBOX_BUILD)
 
 # }}}
 
 # source code compilation {{{
 
+-include $(OBJECTS:.o=.d)
+
 # compile *.cpp source files into *.o object files
 $(BUILD)/%.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $^ -o $@
+	mkdir -p $(BUILD)
+	$(CXX) -MMD -c $(CXXFLAGS) $^ -o $@
 
 # build the binary, link to JsonBox
 $(EXENAME): $(OBJECTS) $(JSONBOX_BIN)
